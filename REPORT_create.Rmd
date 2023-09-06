@@ -1,0 +1,86 @@
+---
+output:
+  html_document:
+    df_print: paged
+always_allow_html: yes
+params:
+  REL_path: path_to_RELEVANT.tsv
+  VAR_path: path_to_VAR.tsv
+  EVI_path: path_to_EVI.tsv
+header-includes: \usepackage{fancyhdr} \usepackage{graphicx}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<script>
+   $(document).ready(function() {
+     $head = $('#header');
+     $head.prepend('<img src=\"~/assets/flomics_logo.png\" style=\"float: right;width: 150px;\"/>')
+   });
+</script>
+
+
+### PATIENT X
+
+### DOB: XX-XX-XXXX \| Test Number
+
+|                        |            |
+|------------------------|------------|
+| **Gender**             | \-         |
+| **Clinical Diagnosis** | \-         |
+| **Report Date**        | --/--/---- |
+| **Collection Date**    | --/--/---- |
+
+# Summary of Somatic Alterations
+
+## Relevant Alterations for Treatment
+
+```{r table1, echo=FALSE, message=FALSE, warning=FALSE}
+library(kableExtra)
+
+# load data for summary table
+REL_table <- read.table(params$REL_path, header=TRUE, sep="\t")
+
+# rename columns
+colnames(REL_table) <- c("Gene", "Alteration", "% cfDNA or Amplification", "Resistance (CIViC)", "Sensititivty/Response (CIViC)")
+
+kable(REL_table, "html") %>%
+  kable_styling(full_width= FALSE)
+
+```
+
+## Detected Somatic Alterations
+
+```{r table2, echo=FALSE, message=FALSE}
+library(kableExtra)
+
+# load data for summary table
+VAR_table <- read.table(params$VAR_path, header=TRUE, sep="\t")
+
+# rename and remove columns
+VAR_table <- subset(VAR_table, select= -c(LEGACY_MUTATION_ID,molecular_profile,FREQ))
+colnames(VAR_table) <- c("Gene","CDS mutation","AA mutation","% cfDNA or Amplification",
+                         "Number of Somatic Samples (COSMIC)","COSMIC url","CMC Significance Tier")
+
+kable(VAR_table, "html") %>%
+  kable_styling(full_width= FALSE)
+
+```
+
+## Clinical Therapy and Evidence Information
+
+```{r table3, echo=FALSE, message=FALSE}
+library(kableExtra)
+
+# load data for summary table
+EVI_table <- read.table(params$EVI_path, header=TRUE, sep="\t", fill=TRUE)
+
+# rename columns
+colnames(EVI_table) <- c("Alteration","Diagnosis","Therapy","Interaction","Evidence Type","Evidence Support","Effect","Evidence","PubMed url","CIViC Rating")
+
+kable(EVI_table, "html") %>%
+  kable_styling(full_width= FALSE)
+
+```
